@@ -1,4 +1,5 @@
-import type { InferType } from 'yup'
+import customFetch from './customFetch';
+import type { InferType } from 'yup';
 import type {
   Club,
   ClubInfo,
@@ -6,8 +7,8 @@ import type {
   MemberCareerStats,
   MemberStats,
   OverallStats,
-} from './models'
-import { ROUTES } from './routes'
+} from './models';
+import { ROUTES } from './routes';
 import type {
   ClubInfoInput,
   ClubSearchInput,
@@ -15,11 +16,11 @@ import type {
   MemberCareerStatsInput,
   MemberStatsInput,
   OverallStatsInput,
-} from './schemas'
-import { SCHEMAS } from './schemas'
+} from './schemas';
+import { SCHEMAS } from './schemas';
 
 class EAFCApiService {
-  private readonly baseUrl = new URL('https://proclubs.ea.com/api/fc/')
+  private readonly baseUrl = new URL('https://proclubs.ea.com/api/fc/');
 
   /**
    * Send a GET request to the EAFC API
@@ -31,14 +32,14 @@ class EAFCApiService {
     endpoint: keyof typeof ROUTES,
     input: TInput,
   ): Promise<TModel> => {
-    const route = ROUTES[endpoint]
-    const url = new URL(route.url, this.baseUrl)
-    await route.schema.validate(input, { strict: true })
+    const route = ROUTES[endpoint];
+    const url = new URL(route.url, this.baseUrl);
+    await route.schema.validate(input, { strict: true });
     Object.keys(input).forEach(key => {
-      url.searchParams.append(key, input[key])
-    })
+      url.searchParams.append(key, input[key]);
+    });
 
-    const response = await fetch(url.toString(), {
+    const response = await customFetch(url.toString(), {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/112.0',
@@ -47,10 +48,22 @@ class EAFCApiService {
         'Accept-Encoding': 'gzip, deflate, br',
       },
       method: 'GET',
-    })
-    const json: TModel = await response.json()
-    return json
-  }
+    });
+
+    const text = await response.text(); // Get the response as text
+    try {
+      const json: TModel = JSON.parse(text); // Parse the text as JSON
+      return json;
+    } catch (error) {
+      console.error('Failed to parse JSON:', error);
+      console.error('Response text:', text); // Log the response text for debugging
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch ${url.toString()}: ${error.message}`);
+      } else {
+        throw new Error(`Failed to fetch ${url.toString()}: ${String(error)}`);
+      }
+    }
+  };
 
   /**
    * Search for a club by name
@@ -59,7 +72,7 @@ class EAFCApiService {
    */
   searchClub = async (
     input: InferType<typeof SCHEMAS.CLUB_SEARCH>,
-  ): Promise<Club[]> => this.get('CLUB_SEARCH', input)
+  ): Promise<Club[]> => this.get('CLUB_SEARCH', input);
 
   /**
    * Get the overall stats of the club
@@ -68,7 +81,7 @@ class EAFCApiService {
    */
   overallStats = async (
     input: InferType<typeof SCHEMAS.OVERALL_STATS>,
-  ): Promise<OverallStats[]> => this.get('OVERALL_STATS', input)
+  ): Promise<OverallStats[]> => this.get('OVERALL_STATS', input);
 
   /**
    * Get the career stats of all members of the club
@@ -77,7 +90,7 @@ class EAFCApiService {
    */
   memberCareerStats = async (
     input: InferType<typeof SCHEMAS.MEMBER_CAREER_STATS>,
-  ): Promise<MemberCareerStats> => this.get('MEMBER_CAREER_STATS', input)
+  ): Promise<MemberCareerStats> => this.get('MEMBER_CAREER_STATS', input);
 
   /**
    * Get the career stats of all members of the club
@@ -86,7 +99,7 @@ class EAFCApiService {
    */
   memberStats = async (
     input: InferType<typeof SCHEMAS.MEMBER_STATS>,
-  ): Promise<MemberStats> => this.get('MEMBER_STATS', input)
+  ): Promise<MemberStats> => this.get('MEMBER_STATS', input);
 
   /**
    * Get the stats of all matches of the club
@@ -95,7 +108,7 @@ class EAFCApiService {
    */
   matchesStats = async (
     input: InferType<typeof SCHEMAS.MATCHES_STATS>,
-  ): Promise<Match[]> => this.get('MATCHES_STATS', input)
+  ): Promise<Match[]> => this.get('MATCHES_STATS', input);
 
   /**
    * Gets information of a club
@@ -106,10 +119,10 @@ class EAFCApiService {
    */
   clubInfo = async (
     input: InferType<typeof SCHEMAS.CLUB_INFO>,
-  ): Promise<ClubInfo> => this.get('CLUB_INFO', input)
+  ): Promise<ClubInfo> => this.get('CLUB_INFO', input);
 }
 
-export { EAFCApiService, SCHEMAS }
+export { EAFCApiService, SCHEMAS };
 export type {
   Club,
   ClubInfo,
@@ -123,4 +136,4 @@ export type {
   MemberStatsInput,
   OverallStats,
   OverallStatsInput,
-}
+};

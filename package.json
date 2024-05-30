@@ -23,7 +23,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "^29.5.6",
+    "@types/jest": "^29.5.12",
+    "@types/node-fetch": "^2.6.11",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
@@ -33,10 +34,13 @@
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^29.7.0",
     "prettier": "^3.0.3",
-    "ts-jest": "^29.1.1",
+    "ts-jest": "^29.1.4",
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "eafc-clubs-api": "^1.2.0",
+    "https": "^1.0.0",
+    "node-fetch": "^2.7.0",
     "yup": "^1.3.2"
   },
   "files": [
